@@ -39,6 +39,14 @@ from utils import l
 # TODO: you have to implement this module by yourself
 # import my_cool_algorithms
 
+# My modules
+# ---
+from utils import preprocess
+from my_code.Apriori import Apriori
+# from apyori import apriori
+# ---
+
+
 def main():
     # Parse command line arguments
     a = args.parse_args()
@@ -47,6 +55,19 @@ def main():
     # Load dataset, the below io handles ibm dataset
     input_data: List[List[str]] = utils.read_file(config.IN_DIR / a.dataset)
     filename = Path(a.dataset).stem
+
+    # My code
+    # ---
+    transactions = preprocess(data=input_data, mode="myApriori")
+    # transactions = preprocess(data=input_data, mode="apyori")
+    # _ = list(apriori(transactions, min_support=a.min_sup))
+    # input()
+
+    apriori = Apriori(transactions=transactions,
+                      min_sup=a.min_sup,
+                      min_conf=a.min_conf)
+    apriori()
+    # ---
 
     # # TODO: you have to implement this function by yourself
     # apriori_out = my_cool_algorithms.apriori(input_data, a)
@@ -63,6 +84,7 @@ def main():
     #     data=fp_growth_out,
     #     filename=config.OUT_DIR / f"{filename}-fp_growth-{a.min_sup}-{a.min_conf}.csv"
     # )
+
 
 if __name__ == "__main__":
     main()

@@ -8,6 +8,7 @@ from typing import Any, List, Tuple, Union
 
 
 def timer(func):
+
     def wrapper(*args, **kwargs):
         start = time.time()
         print(f"Running {func.__name__} ...", end='\r')
@@ -15,7 +16,9 @@ def timer(func):
         end = time.time()
         print(f"{func.__name__} Done in {end - start:.2f} seconds")
         return result
+
     return wrapper
+
 
 @timer
 def read_file(filename: Union[str, Path]) -> List[List[int]]:
@@ -32,6 +35,7 @@ def read_file(filename: Union[str, Path]) -> List[List[int]]:
         #
         for line in Path(filename).read_text().splitlines()
     ]
+
 
 @timer
 def write_file(data: List[Tuple[Any]], filename: Union[str, Path]) -> None:
@@ -57,11 +61,9 @@ def write_file(data: List[Tuple[Any]], filename: Union[str, Path]) -> None:
     with open(filename, 'w') as f:
         writer = csv.writer(f)
         # rule format: antecedent --> consequent
-        writer.writerow(["antecedent", "consequent",
-                        "support", "confidence", "lift"])
+        writer.writerow(
+            ["antecedent", "consequent", "support", "confidence", "lift"])
         writer.writerows(proc_data)
-
-
 
 
 def setup_logger():
@@ -77,15 +79,12 @@ def setup_logger():
 
     l.setLevel(logging.DEBUG)
 
-    fileHandler = logging.FileHandler(
-        filename=log_dir / log_file_name,
-        mode='w'
-    )
+    fileHandler = logging.FileHandler(filename=log_dir / log_file_name,
+                                      mode='w')
     streamHandler = logging.StreamHandler()
 
     allFormatter = logging.Formatter(
-        "%(asctime)s [%(filename)s:%(lineno)d] %(levelname)s: %(message)s"
-    )
+        "%(asctime)s [%(filename)s:%(lineno)d] %(levelname)s: %(message)s")
 
     fileHandler.setFormatter(allFormatter)
     fileHandler.setLevel(logging.INFO)
@@ -98,4 +97,33 @@ def setup_logger():
 
     return l
 
+
 l = setup_logger()
+
+
+def preprocess(data: List[List[str]], mode: str):
+    transactions = {}
+
+    for one_data in data:
+        key = one_data[1]
+        value = one_data[2]
+
+        if key not in transactions.keys():
+            transactions[key] = [value]
+        else:
+            transactions[key].append(value)
+
+    another_transactions = None
+
+    if mode == "myApriori":
+        another_transactions = set()
+
+        for value in transactions.values():
+            another_transactions.add(frozenset(value))
+    else:
+        another_transactions = []
+
+        for value in transactions.values():
+            another_transactions.append(value)
+
+    return another_transactions
