@@ -66,7 +66,10 @@ def main():
     apriori = Apriori(transactions=transactions,
                       min_sup=a.min_sup,
                       min_conf=a.min_conf)
-    apriori()
+    apriori_out = apriori()
+    utils.write_file(data=apriori_out,
+                     filename=config.OUT_DIR /
+                     f"{filename}-apriori-{a.min_sup}-{a.min_conf}.csv")
     # ---
 
     # # TODO: you have to implement this function by yourself
