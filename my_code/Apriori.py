@@ -1,4 +1,4 @@
-from my_code.tools import get_all_subsets, get_support
+from my_code.tools import get_rules, get_support
 from utils import timer
 
 
@@ -38,7 +38,9 @@ class Apriori():
             if len(freq_itemsets) == 0:
                 break
 
-        rules = self.get_rules(all_freq_itemsets=all_freq_itemsets)
+        rules = get_rules(freq_itemsets=all_freq_itemsets,
+                          transactions=self.transactions,
+                          min_conf=self.min_conf)
 
         return rules
 
@@ -85,29 +87,3 @@ class Apriori():
                     cand_itemsets.add(cand_itemset)
 
         return cand_itemsets
-
-    def get_rules(self, all_freq_itemsets: set[frozenset[str]]) -> list[tuple]:
-        rules = []
-
-        for freq_itemset in all_freq_itemsets:
-            subsets = get_all_subsets(itemset=freq_itemset)
-
-            for subset in subsets:
-                remain = freq_itemset.difference(subset)
-
-                freq_itemsset_sup = get_support(itemset=freq_itemset,
-                                                transactions=self.transactions)
-                subset_sup = get_support(itemset=subset,
-                                         transactions=self.transactions)
-                conf = freq_itemsset_sup / subset_sup
-
-                if conf >= self.min_conf:
-                    sup = freq_itemsset_sup / self.transactions_num
-                    remain_sup = get_support(
-                        itemset=remain,
-                        transactions=self.transactions) / self.transactions_num
-
-                    lift = conf / remain_sup
-                    rules.append((subset, remain, sup, conf, lift))
-
-        return rules

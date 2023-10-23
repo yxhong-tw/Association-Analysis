@@ -64,7 +64,6 @@ def main():
                      filename=config.OUT_DIR /
                      f"{filename}-apriori-{a.min_sup}-{a.min_conf}.csv")
 
-    transactions = preprocess(data=input_data)
     fp_growth = FPGrowth(transactions=transactions,
                          min_sup=a.min_sup,
                          min_conf=a.min_conf)

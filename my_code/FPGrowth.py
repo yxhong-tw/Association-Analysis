@@ -1,4 +1,4 @@
-from my_code.tools import get_all_subsets, get_support
+from my_code.tools import get_rules
 from utils import timer
 
 
@@ -97,7 +97,9 @@ class FPGrowth():
                          header_table=header_table)
         self.get_all_freq_itemsets(header_table=header_table,
                                    freq_itemset=set())
-        rules = self.get_rules()
+        rules = get_rules(freq_itemsets=self.freq_itemsets,
+                          transactions=self.transactions,
+                          min_conf=self.min_conf)
 
         return rules
 
@@ -160,7 +162,6 @@ class FPGrowth():
     # Return header_table: dict[frozenset[str], list[int, FPTreeNode]]
     # Return sorted_freq_cond_pattern_bases: list[list[frozenset[str]]]
     def scanCPB(self, cond_pattern_bases: dict[frozenset[str], int]):
-        cond_pattern_bases_num = len(cond_pattern_bases)
         header_table = {}
         sorted_freq_cond_pattern_bases = []
 
@@ -262,29 +263,3 @@ class FPGrowth():
 
             self.get_all_freq_itemsets(header_table=cpb_header_table,
                                        freq_itemset=newfreq_itemset)
-
-    def get_rules(self) -> list[tuple]:
-        rules = []
-
-        for freq_itemset in self.freq_itemsets:
-            subsets = get_all_subsets(itemset=freq_itemset)
-
-            for subset in subsets:
-                remain = freq_itemset.difference(subset)
-
-                freq_itemsset_sup = get_support(itemset=freq_itemset,
-                                                transactions=self.transactions)
-                subset_sup = get_support(itemset=subset,
-                                         transactions=self.transactions)
-                conf = freq_itemsset_sup / subset_sup
-
-                if conf >= self.min_conf:
-                    sup = freq_itemsset_sup / self.transactions_num
-                    remain_sup = get_support(
-                        itemset=remain,
-                        transactions=self.transactions) / self.transactions_num
-
-                    lift = conf / remain_sup
-                    rules.append((subset, remain, sup, conf, lift))
-
-        return rules
