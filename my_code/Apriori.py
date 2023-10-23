@@ -1,3 +1,7 @@
+from utils import timer
+
+
+# TODO: FIX THIS!!!
 class Apriori():
 
     def __init__(self, transactions: set[frozenset[str]], min_sup: float,
@@ -7,6 +11,7 @@ class Apriori():
         self.min_sup = min_sup
         self.min_conf = min_conf
 
+    @timer
     def __call__(self):
         cand_1_itemssets = self.get_cand_1_itemssets(
             transactions=self.transactions)
