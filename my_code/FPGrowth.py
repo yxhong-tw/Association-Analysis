@@ -272,16 +272,16 @@ class FPGrowth():
             for subset in subsets:
                 remain = freq_itemset.difference(subset)
 
-                freq_itemsset_sup = get_support(itemsset=freq_itemset,
+                freq_itemsset_sup = get_support(itemset=freq_itemset,
                                                 transactions=self.transactions)
-                subset_sup = get_support(itemsset=subset,
+                subset_sup = get_support(itemset=subset,
                                          transactions=self.transactions)
                 conf = freq_itemsset_sup / subset_sup
 
                 if conf >= self.min_conf:
                     sup = freq_itemsset_sup / self.transactions_num
                     remain_sup = get_support(
-                        itemsset=remain,
+                        itemset=remain,
                         transactions=self.transactions) / self.transactions_num
 
                     lift = conf / remain_sup

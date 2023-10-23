@@ -36,15 +36,11 @@ import config
 import utils
 from utils import l
 
-# TODO: you have to implement this module by yourself
-# import my_cool_algorithms
-
 # My modules
 # ---
 from utils import preprocess
 from my_code.Apriori import Apriori
 from my_code.FPGrowth import FPGrowth
-# from apyori import apriori
 # ---
 
 
@@ -59,7 +55,7 @@ def main():
 
     # My code
     # ---
-    transactions = preprocess(data=input_data, mode="myApriori")
+    transactions = preprocess(data=input_data)
     apriori = Apriori(transactions=transactions,
                       min_sup=a.min_sup,
                       min_conf=a.min_conf)
@@ -68,7 +64,7 @@ def main():
                      filename=config.OUT_DIR /
                      f"{filename}-apriori-{a.min_sup}-{a.min_conf}.csv")
 
-    transactions = preprocess(data=input_data, mode="myFPGrowth")
+    transactions = preprocess(data=input_data)
     fp_growth = FPGrowth(transactions=transactions,
                          min_sup=a.min_sup,
                          min_conf=a.min_conf)
@@ -77,22 +73,6 @@ def main():
                      filename=config.OUT_DIR /
                      f"{filename}-fp_growth-{a.min_sup}-{a.min_conf}.csv")
     # ---
-
-    # # TODO: you have to implement this function by yourself
-    # apriori_out = my_cool_algorithms.apriori(input_data, a)
-    # # Write output to file
-    # utils.write_file(
-    #     data=apriori_out,
-    #     filename=config.OUT_DIR / f"{filename}-apriori-{a.min_sup}-{a.min_conf}.csv"
-    # )
-
-    # # TODO: you have to implement this function by yourself
-    # fp_growth_out = my_cool_algorithms.fp_growth(input_data, a)
-    # # Write output to file
-    # utils.write_file(
-    #     data=fp_growth_out,
-    #     filename=config.OUT_DIR / f"{filename}-fp_growth-{a.min_sup}-{a.min_conf}.csv"
-    # )
 
 
 if __name__ == "__main__":

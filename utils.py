@@ -101,8 +101,7 @@ def setup_logger():
 l = setup_logger()
 
 
-# mode != "myApriori", return another_transactions: list[list[str]]
-def preprocess(data: List[List[str]], mode: str):
+def preprocess(data: List[List[str]]):
     transactions = {}
 
     for one_data in data:
@@ -114,17 +113,9 @@ def preprocess(data: List[List[str]], mode: str):
         else:
             transactions[key].append(value)
 
-    another_transactions = None
+    return_transactions = []
 
-    if mode == "myApriori":
-        another_transactions = set()
+    for value in transactions.values():
+        return_transactions.append(value)
 
-        for value in transactions.values():
-            another_transactions.add(frozenset(value))
-    else:
-        another_transactions = []
-
-        for value in transactions.values():
-            another_transactions.append(value)
-
-    return another_transactions
+    return return_transactions

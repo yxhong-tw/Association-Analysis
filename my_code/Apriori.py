@@ -1,10 +1,10 @@
+from my_code.tools import get_all_subsets, get_support
 from utils import timer
 
 
-# TODO: FIX THIS!!!
 class Apriori():
 
-    def __init__(self, transactions: set[frozenset[str]], min_sup: float,
+    def __init__(self, transactions: list[list[str]], min_sup: float,
                  min_conf: float):
         self.transactions = transactions
         self.transactions_num = len(transactions)
@@ -13,143 +13,101 @@ class Apriori():
 
     @timer
     def __call__(self):
-        cand_1_itemssets = self.get_cand_1_itemssets(
-            transactions=self.transactions)
+        cand_1_itemsets = self.get_cand_1_itemsets()
 
-        freq_itemssets, freq_itemssets_sup_table = self.get_freq_data(
-            cand_itemssets=cand_1_itemssets,
-            min_sup=self.min_sup,
-            transactions=self.transactions)
+        freq_itemsets, freq_itemsets_sup_table = self.get_freq_data(
+            cand_itemsets=cand_1_itemsets)
 
-        all_freq_itemssets = set()
-        for freq_itemsset in freq_itemssets:
-            all_freq_itemssets.add(freq_itemsset)
+        all_freq_itemsets = set()
+        for freq_itemset in freq_itemsets:
+            all_freq_itemsets.add(freq_itemset)
 
         k = 2
 
         while True:
-            cand_itemssets = self.get_cand_k_itemssets(
-                k=k, freq_itemssets=freq_itemssets)
-            freq_itemssets, temp_freq_itemssets_sup_table = self.get_freq_data(
-                cand_itemssets=cand_itemssets,
-                min_sup=self.min_sup,
-                transactions=self.transactions)
+            cand_itemsets = self.get_cand_k_itemsets(
+                k=k, freq_itemsets=freq_itemsets)
+            freq_itemsets, temp_freq_itemsets_sup_table = self.get_freq_data(
+                cand_itemsets=cand_itemsets)
 
-            for freq_itemsset in freq_itemssets:
-                all_freq_itemssets.add(freq_itemsset)
-            freq_itemssets_sup_table.update(temp_freq_itemssets_sup_table)
+            for freq_itemset in freq_itemsets:
+                all_freq_itemsets.add(freq_itemset)
+            freq_itemsets_sup_table.update(temp_freq_itemsets_sup_table)
             k += 1
 
-            if len(freq_itemssets) == 0:
+            if len(freq_itemsets) == 0:
                 break
 
-        rules = self.get_rules(all_freq_itemssets=all_freq_itemssets)
+        rules = self.get_rules(all_freq_itemsets=all_freq_itemsets)
 
         return rules
 
-    def get_cand_1_itemssets(
-            self, transactions: set[frozenset[str]]) -> set[frozenset[str]]:
-        cand_1_itemssets = set()
+    def get_cand_1_itemsets(self) -> set[frozenset[str]]:
+        cand_1_itemsets = set()
 
-        for transaction in transactions:
+        for transaction in self.transactions:
             for item in transaction:
-                if not frozenset([item]) in cand_1_itemssets:
-                    cand_1_itemssets.add(frozenset([item]))
+                if not frozenset([item]) in cand_1_itemsets:
+                    cand_1_itemsets.add(frozenset([item]))
 
-        return cand_1_itemssets
+        return cand_1_itemsets
 
     def get_freq_data(
-        self, cand_itemssets: set[frozenset[str]], min_sup: float,
-        transactions: set[frozenset[str]]
+        self, cand_itemsets: set[frozenset[str]]
     ) -> (set[frozenset[str]], dict[frozenset[str], int]):
         sup_table = {}
 
-        for cand_itemsset in cand_itemssets:
-            sup = self.get_support(itemsset=cand_itemsset,
-                                   transactions=transactions)
+        for cand_itemset in cand_itemsets:
+            sup = get_support(itemset=cand_itemset,
+                              transactions=self.transactions)
 
             if sup > 0:
-                sup_table[cand_itemsset] = sup
+                sup_table[cand_itemset] = sup
 
-        freq_itemssets = set()
-        freq_itemssets_sup_table = {}
+        freq_itemsets = set()
+        freq_itemsets_sup_table = {}
 
         for item, sup in sup_table.items():
-            if (sup / self.transactions_num) >= min_sup:
-                freq_itemssets.add(item)
-                freq_itemssets_sup_table[item] = sup
+            if (sup / self.transactions_num) >= self.min_sup:
+                freq_itemsets.add(item)
+                freq_itemsets_sup_table[item] = sup
 
-        return freq_itemssets, freq_itemssets_sup_table
+        return freq_itemsets, freq_itemsets_sup_table
 
-    def get_support(self, itemsset: frozenset[str],
-                    transactions: set[frozenset[str]]) -> int:
-        support = 0
+    def get_cand_k_itemsets(self, k: int, freq_itemsets: set[frozenset[str]]):
+        cand_itemsets = set()
 
-        for transaction in transactions:
-            if itemsset.issubset(transaction):
-                support += 1
+        for freq_itemset_i in freq_itemsets:
+            for freq_itemset_j in freq_itemsets:
+                cand_itemset = frozenset.union(freq_itemset_i, freq_itemset_j)
 
-        return support
+                if len(cand_itemset) == k:
+                    cand_itemsets.add(cand_itemset)
 
-    def get_cand_k_itemssets(self, k: int,
-                             freq_itemssets: set[frozenset[str]]):
-        cand_itemssets = set()
+        return cand_itemsets
 
-        for freq_itemssets_i in freq_itemssets:
-            for freq_itemssets_j in freq_itemssets:
-                cand_itemsset = frozenset.union(freq_itemssets_i,
-                                                freq_itemssets_j)
-
-                if len(cand_itemsset) == k:
-                    cand_itemssets.add(cand_itemsset)
-
-        return cand_itemssets
-
-    def get_rules(self,
-                  all_freq_itemssets: set[frozenset[str]]) -> list[tuple]:
+    def get_rules(self, all_freq_itemsets: set[frozenset[str]]) -> list[tuple]:
         rules = []
 
-        for freq_itemsset in all_freq_itemssets:
-            subsets = self.get_all_subsets(itemsset=freq_itemsset)
+        for freq_itemset in all_freq_itemsets:
+            subsets = get_all_subsets(itemset=freq_itemset)
 
             for subset in subsets:
-                remain = freq_itemsset.difference(subset)
+                remain = freq_itemset.difference(subset)
 
-                freq_itemsset_sup = self.get_support(
-                    itemsset=freq_itemsset, transactions=self.transactions)
-                subset_sup = self.get_support(itemsset=subset,
-                                              transactions=self.transactions)
+                freq_itemsset_sup = get_support(itemset=freq_itemset,
+                                                transactions=self.transactions)
+                subset_sup = get_support(itemset=subset,
+                                         transactions=self.transactions)
                 conf = freq_itemsset_sup / subset_sup
 
                 if conf >= self.min_conf:
                     sup = freq_itemsset_sup / self.transactions_num
-                    remain_sup = self.get_support(
-                        itemsset=remain,
+                    remain_sup = get_support(
+                        itemset=remain,
                         transactions=self.transactions) / self.transactions_num
 
                     lift = conf / remain_sup
-
                     rules.append((subset, remain, sup, conf, lift))
 
         return rules
-
-    def get_all_subsets(self, itemsset: frozenset[str]):
-        subsets = [[]]
-
-        for item in itemsset:
-            new_subsets = []
-
-            for subset in subsets:
-                new_subsets.append(subset + [item])
-
-            subsets.extend(new_subsets)
-
-        ret_subsets = set()
-
-        for subset in subsets:
-            if len(subset) == 0 or len(subset) == len(itemsset):
-                continue
-
-            ret_subsets.add(frozenset(subset))
-
-        return ret_subsets
