@@ -50,12 +50,12 @@ def write_file(data: List[Tuple[Any]], filename: Union[str, Path]) -> None:
     """
     proc_data = []
     for rule in data:
-        PREC = 2
+        # PREC = 2
         a, c, sup, conf, lift = rule
         a, c = list(set(a)), list(set(c))
-        sup = round(sup, PREC)
-        conf = round(conf, PREC)
-        lift = round(lift, PREC)
+        # sup = round(sup, PREC)
+        # conf = round(conf, PREC)
+        # lift = round(lift, PREC)
         proc_data.append([a, c, sup, conf, lift])
 
     with open(filename, 'w') as f:
@@ -101,6 +101,7 @@ def setup_logger():
 l = setup_logger()
 
 
+# mode != "myApriori", return another_transactions: list[list[str]]
 def preprocess(data: List[List[str]], mode: str):
     transactions = {}
 
